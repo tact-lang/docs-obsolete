@@ -57,8 +57,6 @@ Generic and raw cell
 
 ### New type declaration
 
-Each new type 
-
 ```
 type T = <type-returning expression>;
 ```
