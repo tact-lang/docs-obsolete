@@ -1,20 +1,109 @@
 # Tact Language Specification
 
+Tact types are modelled as _sets of possible values_. Therefore compatible type for assignment is a subset of values.
+
+Each new defined type is strictly separate and requires explicitly conversion. E.g. `Bool` is not interchangeable with integers 0 and -1.
+
 ## Base types
 
 What are TVM types and what are Tact types; what are the mapping from one to another?
 
-* numbers 
-* strings
-* tuples
-* tensors - do we even need them; for ABI we need stable distinction between tuples/tensors?
-* cells
+### Never
 
-## Algebraic types
+The type that has no possible values. Used for eliminating branches of code and values.
 
-* structs
-* enums
-* unions
+```
+type Never = builtin::Never;
+```
+
+### Null
+
+```
+type Null = builtin::NULL;
+```
+
+### Bool
+
+```
+type Bool = 0 | -1;
+```
+
+### Int257
+
+Base integer type.
+
+```
+type Int257 = builtin::Int257;
+```
+
+### Range
+
+TBD.
+
+### tuples
+
+TBD.
+
+### tensors
+
+Do we even need them; for ABI we need stable distinction between tuples/tensors?
+
+### Cell
+
+Generic and raw cell
+
+
+## New types
+
+### New type declaration
+
+Each new type 
+
+```
+type T = <type-returning expression>;
+```
+
+### Structs
+
+Product types:
+
+```
+struct T {
+  a: A,
+  b: B,
+  ...
+}
+```
+
+or: 
+
+```
+type T = struct { ... }
+```
+
+The latter might be useful in some generic type-building contexts.
+
+### Enums
+
+Sum types:
+
+```
+enum T {
+   A,
+   B(T2),
+}
+```
+
+We may consider not having enums in favor of unions. Or not having unions at all.
+
+### Unions
+
+Fun idea: maybe merge unions and ranges?
+
+So that `0..<10` is shorthand for `0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9`.
+
+`for-in` loop would iterate over all concretely enumerable types.
+
 
 ## Serialization strategies
 
