@@ -53,6 +53,26 @@ Do we even need them; for ABI we need stable distinction between tuples/tensors?
 Generic and raw cell
 
 
+## Phases
+
+Tact execution consists of two phases: _comptime_ and _runtime_.
+
+_Comptime Tact_ is a smaller language that does not have interfaces, actors and generics. 
+It has immutable bindings, values of type "Type" and set-operations on types.
+
+The goal of _Comptime Tact_ is to generate types, functions and impls that will be used in runtime.
+
+Tact separates these phases syntactically:
+
+1. File-level code is comptime: let bindings, type declarations, function declarations.
+2. Comptime function body: comptime.
+3. Runtime function body: runtime.
+4. Struct/enum body: comptime.
+5. Impl body: comptime.
+6. Interface body: comptime.
+
+
+
 ## New types
 
 ### New type declaration
@@ -61,32 +81,36 @@ Generic and raw cell
 type T = <type-returning expression>;
 ```
 
+```
+type A = B; // A != B
+```
+
+### Type alias
+
+Within comptime context `let` binding is used just like in runtime - for a new variable:
+
+```
+let B = A; // B == A
+```
+
 ### Structs
 
 Product types:
 
 ```
-struct T {
+type T = struct {
   a: A,
   b: B,
   ...
 }
 ```
 
-or: 
-
-```
-type T = struct { ... }
-```
-
-The latter might be useful in some generic type-building contexts.
-
 ### Enums
 
 Sum types:
 
 ```
-enum T {
+type T = enum {
    A,
    B(T2),
 }
