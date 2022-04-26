@@ -121,6 +121,39 @@ Visibility via explicit `pub` declaration.
 
 ## Actors
 
+### Interfaces and impls
+
+We do need to support impls for multiple interfaces, similar to trait impls in Rust:
+
+```
+interface A {
+  internal foo();
+}
+interface B {
+  internal bar();
+}
+impl A for T {
+  internal foo() { ... };
+}
+impl B for T {
+  internal bar() { ... };
+}
+```
+
+For ordinary contracts with their own interface, do we have a shortcut to avoid duplicate definitions?
+
+```
+actor T {
+  internal something() { ... };
+}
+```
+
+Maybe use `actor` instead of `impl` for interface impls? 
+
+Would we have traits for plain structs and methods?
+
+See also https://www.swiftbysundell.com/articles/swift-actors/
+
 ### Message send syntax
 
 Ordinary functions/methods are easy and Rust/Swift-style:
@@ -162,7 +195,6 @@ send(addr, msg, args);
 addr.send(msg, args);
 addr.send(Message{value: 0, body: ...});
 ```
-
 
 ### Typed message bodies
 
