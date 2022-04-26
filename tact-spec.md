@@ -119,8 +119,49 @@ use foo::T // refer later to T directly
 Visibility via explicit `pub` declaration.
 
 
-## Actor interfaces
+## Actors
 
+### Message send syntax
+
+Ordinary functions/methods are easy and Rust/Swift-style:
+
+```
+T::foo(a,b,c);
+a.foo(b,c);
+```
+
+We might need to distinguish message-sending syntax from ordinary function calls to:
+* quickly see if the function is pure or not;
+* avoid possible ambiguities
+
+No special syntax:
+
+```
+addr.msg(args);
+```
+
+Send keyword:
+
+```
+send addr.msg(args);
+```
+
+Fancy punctuation:
+
+```
+@addr.msg(args);
+addr->msg(args);
+addr~msg(args);
+msg(args)->addr;
+```
+
+Bureaucratic:
+
+```
+send(addr, msg, args);
+addr.send(msg, args);
+addr.send(Message{value: 0, body: ...});
+```
 
 
 ### Typed message bodies
