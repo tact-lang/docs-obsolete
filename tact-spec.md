@@ -100,8 +100,6 @@ Fun idea: maybe merge unions and ranges?
 
 So that `0..<10` is shorthand for `0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9`.
 
-`for-in` loop would iterate over all concretely enumerable types.
-
 
 ## Serialization strategies
 
@@ -122,6 +120,8 @@ Visibility via explicit `pub` declaration.
 
 
 ## Actor interfaces
+
+
 
 ### Typed message bodies
 
@@ -162,4 +162,27 @@ handler transfer(body: Message) { ... } // external
 
 handler process(sender: Address, value: Coins, body: Message) { ... } // internal
 ```
+
+### Message tag
+
+Each message in an actor must be uniquely identified by a 32-bit tag. 
+By default, 32-bit message tag is calculated as CRC32 checksum of the method declaration.
+
+The message tag can be overriden (for compatibility or disambiguation) by explicit declaration:
+
+```  
+  internal(1008) my_message(...) { ... }
+```
+
+Pros: simple, elegant.
+
+Cons: might be at odds with other attributes if there are any.
+
+Alternative:
+
+```
+  @message_tag(1008)
+  internal my_message(...) { ... }
+```
+
 
