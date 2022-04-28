@@ -124,10 +124,62 @@ Fun idea: maybe merge unions and ranges?
 
 So that `0..<10` is shorthand for `0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9`.
 
+## Memory representation
+Data structures can be represented in the TVM bytecode as `Cell`s or `Tuple`s.
+
+### Representation using Cells
+Cells allow to store arbitrary sequence of bytes up to 1023 bits. 
+
+Pros of using Cells:
+1. No need of deserializing when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
+2. Compact storage of integers that do not cover the entire `int257` range.
+
+Cons of using Cells:
+1. Necessity to create hierarchical cell structures because data the structure can be larger than 1023 bytes.
+2. Expensive read operations (compared to tuples).
+3. No write operations.
+
+### Representation using Tuples
+Tuple in TVM is a list of values with arbitrary types up to 255 elements.
+
+Pros of using Tuples:
+1. Simple read/write of arbitrary elements.
+
+Cons of using Tuples:
+1. Necessity to deserialize into Cells when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
+2. Expensive operations with tuples having more than 16 elements.
+
+### Solution: Always use tuples
+Cells are designed for sending messages between actors and storing values in persistent storage `c4`. Instead, tuples are designed to represent algebraic data types (see 1.1.3 section of [TVM paper](https://ton-blockchain.github.io/docs/tvm.pdf)).
+
+Tuples have more simpler API which allows to get values from the tuple using 1 bytecode operation `INDEX` while extraction from cell require:
+1. Create slice if not created.
+2. Push bits to be skipped at the stack.
+3. Skip bits using `SDSKIPFIRST`.
+4. Read field.
+
+Tuple elements can be mutated using `SETINDEX` opcode while slice of cell can be mutated by:
+1. Create new builder.
+2. Store all previous data before field need to be mutated.
+3. Store mutated field.
+4. Store all other fields.
+
+Based on the above it is better to use tuples to represent data structures in the TVM.
+
+Suggestions:
+1. Warning lint when use struct definitions with more than 16 fields.
+
+Unresolved questions:
+1. Should memory representation has stable rules or be a implement-details?
+2. Should we introduce Cell memory representation for messages or storage elements?
+
+#### Structs as tuples
+TODO
+
+#### Sum types as tuples
+Sum types can be stored like a struct but with addition 0-index field representing a discriminant.
 
 ## Serialization strategies
-
-* tuples vs cell trees?
 * automatic VS annotated VS custom serializers
 
 ## Namespaces and visibility
