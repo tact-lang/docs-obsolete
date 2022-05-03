@@ -1,8 +1,24 @@
 # Tact Language Specification
 
-Tact types are modelled as _sets of possible values_. Therefore compatible type for assignment is a subset of values.
+## Why Tact?
 
-Each new defined type is strictly separate and requires explicitly conversion. E.g. `Bool` is not interchangeable with integers 0 and -1.
+Tact is a safe and efficient high-level programming language for writing TON smart contracts.
+
+Tact offers:
+
+* High-level type system with algebraic types and numeric bounds.
+* Automatic encoding to and from TON Cells with efficient partial access.
+* First-class support for strictly-typed message handling.
+
+
+## Type system
+
+* Strict type checking, no automatic casts.
+* Types are modelled as sets of values.
+* Generics supported via compile-time execution, where types are values.
+* Algebraic types: sum types (unions) and product types (structs).
+* Numeric bounds for built-in types.
+
 
 ## Base types
 
@@ -13,19 +29,21 @@ What are TVM types and what are Tact types; what are the mapping from one to ano
 The type that has no possible values. Used for eliminating branches of code and values.
 
 ```
-type Never = builtin::Never;
+let Never = builtin::Never;
 ```
 
 ### Null
 
 ```
-type Null = builtin::NULL;
+let Null = builtin::NULL;
 ```
 
 ### Bool
 
 ```
-type Bool = 0 | -1;
+let False = type{inner: IntValue(0)};
+let True = type{inner: IntValue(-1)};
+let Bool = False | True;
 ```
 
 ### Int257
@@ -40,13 +58,13 @@ type Int257 = builtin::Int257;
 
 TBD.
 
-### tuples
+### Tuples
 
 TBD.
 
-### tensors
+### Tensors
 
-Do we even need them; for ABI we need stable distinction between tuples/tensors?
+FunC tensors are simply multiple return values. We can optimize tuples as such and expose only Tuples in the type system.
 
 ### Cell
 
