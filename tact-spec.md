@@ -79,7 +79,7 @@ Tact separates these phases syntactically:
 User-defined types is a types which is defined by an used based on already existing types. 
 
 ### Product types
-Product types is a types that can have multiple fields of different types that exists as one entity. Besides of fields product types can also have functions that operates on type fields TODO.
+Product types are types that can have multiple fields of different types that exists as one entity. Product types have fields and methods — functions that operate on these fields.
 
 Example of the declaration of the product type:
 ```
