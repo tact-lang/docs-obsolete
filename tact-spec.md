@@ -75,54 +75,113 @@ Tact separates these phases syntactically:
 
 ## New types
 
-### New type declaration
+## User-defined types
+User-defined types is a types which is defined by an used based on already existing types. 
 
-```
-type T = <type-returning expression>;
-```
+### Product types
+Product types is a types that can have multiple fields of different types that exists as one entity. Besides of fields product types can also have functions that operates on type fields TODO.
 
+Example of the declaration of the product type:
 ```
-type A = B; // A != B
-```
-
-### Type alias
-
-Within comptime context `let` binding is used just like in runtime - for a new variable:
-
-```
-let B = A; // B == A
+let Foo = type {
+  field1: Type1,
+  field2: Type2,
+  // etc
+};
 ```
 
-### Structs
-
-Product types:
-
+Type can be generalized using function:
 ```
-type T = struct {
-  a: A,
-  b: B,
-  ...
-}
-```
-
-### Enums
-
-Sum types:
-
-```
-type T = enum {
-   A,
-   B(T2),
-}
+let Foo = fn(X: Type) -> Type {
+  type {
+    field1: X
+  }
+};
+// Usage
+let IntFoo = Foo(Int257);
 ```
 
-We may consider not having enums in favor of unions. Or not having unions at all.
+or using shortcut syntax:
+```
+let Foo(X: Type) = type {
+  field1: X
+};
+// Usage
+let IntFoo = Foo(Int257);
+```
+
+Type construction:
+```
+let foo = Foo{field1: value1, field: value2, /* etc */};
+```
+
+Type deconstruction:
+```
+let Foo{field1: binding_name1, field2: binding_name2} = foo;
+let Foo{field1: binding_name1, _} = foo;
+```
+
+Get access to the field:
+```
+let _ = foo.field1;
+```
+
+Mutate field: 
+```
+~foo.field = value;
+```
 
 ### Unions
+Union is a sum-type means it is a type that can be one of multiple possible options. Union type does not create new constructors.
 
-Fun idea: maybe merge unions and ranges?
+Union type definition:
+```
+let Red = type{ /* possible fields */ };
+let Green = type{ /* possible fields */ };
+let Color = Red | Green;
+```
 
-So that `0..<10` is shorthand for `0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9`.
+Union can be generalized using function:
+```
+let Color = fn(X: Type) -> Type {
+  Red(X) | Green(X)
+};
+// Usage
+let IntColor = Color(int257);
+```
+
+or using shortcut syntax:
+```
+let Color(X: Type) = Red(X) | Green(X);
+// Usage
+let IntColor = Color(Int257);
+```
+
+Union construction:
+```
+fn accept_color(color: Color) {}
+fn do_something() {
+  // Construction
+  let color = Red{ /*fields*/ };
+  // Usage
+  accept_color(color);
+}
+```
+
+Union deconstruction:
+```
+let data = match color {
+  Red{value} => value,
+  Green{value} => value,
+};
+```
+
+Union can be anonymous:
+```
+let Red = type{};
+let Green = type{};
+fn returns_color() -> Red | Green { ... }
+```
 
 ## Memory representation
 Data structures can be represented in the TVM bytecode as `Cell`s or `Tuple`s.
