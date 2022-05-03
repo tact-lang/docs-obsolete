@@ -1,5 +1,12 @@
 # Tact Language Specification
 
+* [Why Tact?](#why-tact)
+* [Type system](#type-system)
+* [Memory model](#memory-model)
+* [Execution](#execution)
+* [Actors](#actors)
+
+
 ## Why Tact?
 
 Tact is a safe and efficient high-level programming language for writing TON smart contracts.
@@ -20,7 +27,7 @@ Tact offers:
 * Numeric bounds for built-in types.
 
 
-## Base types
+### Built-in types
 
 What are TVM types and what are Tact types; what are the mapping from one to another?
 
@@ -38,14 +45,6 @@ let Never = builtin::Never;
 let Null = builtin::NULL;
 ```
 
-### Bool
-
-```
-let False = type{inner: IntValue(0)};
-let True = type{inner: IntValue(-1)};
-let Bool = False | True;
-```
-
 ### Int257
 
 Base integer type.
@@ -54,7 +53,7 @@ Base integer type.
 type Int257 = builtin::Int257;
 ```
 
-### Range
+### Cell
 
 TBD.
 
@@ -62,32 +61,18 @@ TBD.
 
 TBD.
 
+
+
+### Standard types
+
+### Range
+
+TBD.
+
+
 ### Tensors
 
 FunC tensors are simply multiple return values. We can optimize tuples as such and expose only Tuples in the type system.
-
-### Cell
-
-Generic and raw cell
-
-
-## Phases
-
-Tact execution consists of two phases: _comptime_ and _runtime_.
-
-_Comptime Tact_ is a smaller language that does not have interfaces, actors and generics. 
-It has immutable bindings, values of type "Type" and set-operations on types.
-
-The goal of _Comptime Tact_ is to generate types, functions and impls that will be used in runtime.
-
-Tact separates these phases syntactically:
-
-1. File-level code is comptime: let bindings, type declarations, function declarations.
-2. Comptime function body: comptime.
-3. Runtime function body: runtime.
-4. Struct/enum body: comptime.
-5. Impl body: comptime.
-6. Interface body: comptime.
 
 
 
@@ -201,8 +186,11 @@ let Green = type{};
 fn returns_color() -> Red | Green { ... }
 ```
 
-## Memory representation
+## Memory model
+
 Data structures can be represented in the TVM bytecode as `Cell`s or `Tuple`s.
+
+All variables are immutable by default. 
 
 ### Representation using Cells
 Cells allow to store arbitrary sequence of bytes up to 1023 bits. 
@@ -259,6 +247,7 @@ Sum types can be stored like a struct but with addition 0-index field representi
 ## Serialization strategies
 * automatic VS annotated VS custom serializers
 
+
 ## Namespaces and visibility
 
 We could do Rust-style namespaces: stuff from `foo.tact` can be imported as:
@@ -270,6 +259,26 @@ use foo::T // refer later to T directly
 ```
 
 Visibility via explicit `pub` declaration.
+
+
+
+## Execution
+
+Tact execution consists of two phases: _comptime_ and _runtime_.
+
+_Comptime Tact_ is a smaller language that does not have interfaces, actors and generics. 
+It has immutable bindings, values of type "Type" and set-operations on types.
+
+The goal of _Comptime Tact_ is to generate types, functions and impls that will be used in runtime.
+
+Tact separates these phases syntactically:
+
+1. File-level code is comptime: let bindings, type declarations, function declarations.
+2. Comptime function body: comptime.
+3. Runtime function body: runtime.
+4. Struct/enum body: comptime.
+5. Impl body: comptime.
+6. Interface body: comptime.
 
 
 ## Actors
