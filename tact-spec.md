@@ -1,9 +1,27 @@
 # Tact Language Specification
 
 * [Why Tact?](#why-tact)
+* [Syntax overview](#syntax-overview)
 * [Type system](#type-system)
-* [Memory model](#memory-model)
-* [Execution](#execution)
+  * [Built-in types](#built-in-types)
+  * [Standard types](#standard-types)
+  * [Structs](#structs)
+  * [Unions](#unions)
+  * [Functions](#functions)
+  * [Interfaces](#interfaces)
+* [Generics](#generics)
+  * [Compile-time execution](#compile-time-execution)
+  * [Higher-order types](#higher-order-types)
+  * [Generic types](#generic-types)
+  * [Generic functions](#generic-functions)
+  * [Annotations](#annotations)
+  * [Numerical bounds](#numerical-bounds)
+* [Representation in TVM](#representation-in-tvm)
+* [Mutability](#mutability)
+* [Serialization](#serialization)
+* [Namespaces and visibility](#namespaces-and-visibility)
+* [Operators](#operators)
+* [Control flow](#control-flow)
 * [Actors](#actors)
 
 
@@ -18,20 +36,46 @@ Tact offers:
 * First-class support for strictly-typed message handling.
 
 
+## Syntax overview
+
+TBD: short examples and key points
+* variables
+* code style
+* comments
+* semicolons
+* types
+* generics
+* functions
+* methods
+* actors
+
+```
+#tact 1.0
+
+let CONSTANT = 1;
+
+fn plus_one(a: Int8) -> Int257 {
+   return a + 1;
+}
+
+...
+```
+
 ## Type system
 
+TBD: quick overview of the main features/aspects.
+
 * Strict type checking, no automatic casts.
-* Types are modelled as sets of values.
 * Generics supported via compile-time execution, where types are values.
 * Algebraic types: sum types (unions) and product types (structs).
-* Numeric bounds for built-in types.
+* Numeric bounds.
 
 
 ### Built-in types
 
-What are TVM types and what are Tact types; what are the mapping from one to another?
+TBD: relation between TVM types and Tact types.
 
-### Never
+#### Never
 
 The type that has no possible values. Used for eliminating branches of code and values.
 
@@ -39,13 +83,13 @@ The type that has no possible values. Used for eliminating branches of code and 
 let Never = builtin::Never;
 ```
 
-### Null
+#### Null
 
 ```
 let Null = builtin::NULL;
 ```
 
-### Int257
+#### Int257
 
 Base integer type.
 
@@ -53,40 +97,30 @@ Base integer type.
 type Int257 = builtin::Int257;
 ```
 
-### Cell
+#### Cell
 
 TBD.
 
-### Tuples
+#### Tuples?
 
-TBD.
-
+TBD?
 
 
 ### Standard types
 
-### Range
-
-TBD.
-
-
-### Tensors
-
-FunC tensors are simply multiple return values. We can optimize tuples as such and expose only Tuples in the type system.
+TBD: what do we ship as a standard library: ranges, subranges of integers, Option/Result etc?
 
 
 
-## New types
+## Structs
 
-## User-defined types
-User-defined types is a types which is defined by an used based on already existing types. 
+TBD: define structs without introducing generics first. Generics will be dealt in a separate section.
 
-### Product types
-Product types are types that can have multiple fields of different types that exists as one entity. Product types have fields and methods — functions that operate on these fields.
+Structs (aka "product types") allow  multiple fields of different types that exists as one entity. Product types have fields and methods — functions that operate on these fields.
 
 Example of the declaration of the product type:
 ```
-let Foo = type {
+let Foo = struct {
   field1: Type1,
   field2: Type2,
   // etc
@@ -106,7 +140,7 @@ let IntFoo = Foo(Int257);
 
 or using shortcut syntax:
 ```
-let Foo(X: Type) = type {
+let Foo(X: Type) = struct {
   field1: X
 };
 // Usage
@@ -135,7 +169,13 @@ Mutate field:
 ```
 
 ### Unions
-Union is a sum-type means it is a type that can be one of multiple possible options. Union type does not create new constructors.
+
+TBD: 
+* define unions without introducing generics first.
+* explain newtype semantics and lack of newtypes for cases
+* show match statement
+
+Union (aka sum-type) means it is a type that can be one of multiple possible options. Union type does not create new constructors.
 
 Union type definition:
 ```
@@ -186,69 +226,84 @@ let Green = type{};
 fn returns_color() -> Red | Green { ... }
 ```
 
-## Memory model
+### Functions
 
-Data structures can be represented in the TVM bytecode as `Cell`s or `Tuple`s.
+TBD: how function declarations look like
 
-All variables are immutable by default. 
+TBD: what function type is
 
-### Representation using Cells
-Cells allow to store arbitrary sequence of bytes up to 1023 bits. 
+TBD: anonymous functions
 
-Pros of using Cells:
-1. No need of deserializing when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
-2. Compact storage of integers that do not cover the entire `int257` range.
 
-Cons of using Cells:
-1. Necessity to create hierarchical cell structures because data the structure can be larger than 1023 bytes.
-2. Expensive read operations (compared to tuples).
-3. No write operations.
+### Interfaces
 
-### Representation using Tuples
-Tuple in TVM is a list of values with arbitrary types up to 255 elements.
+TBD: why we need interfaces and their semantics.
 
-Pros of using Tuples:
-1. Simple read/write of arbitrary elements.
 
-Cons of using Tuples:
-1. Necessity to deserialize into Cells when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
-2. Expensive operations with tuples having more than 16 elements.
 
-### Solution: Always use tuples
-Cells are designed for sending messages between actors and storing values in persistent storage `c4`. Instead, tuples are designed to represent algebraic data types (see 1.1.3 section of [TVM paper](https://ton-blockchain.github.io/docs/tvm.pdf)).
 
-Tuples have more simpler API which allows to get values from the tuple using 1 bytecode operation `INDEX` while extraction from cell require:
-1. Create slice if not created.
-2. Push bits to be skipped at the stack.
-3. Skip bits using `SDSKIPFIRST`.
-4. Read field.
 
-Tuple elements can be mutated using `SETINDEX` opcode while slice of cell can be mutated by:
-1. Create new builder.
-2. Store all previous data before field need to be mutated.
-3. Store mutated field.
-4. Store all other fields.
 
-Based on the above it is better to use tuples to represent data structures in the TVM.
+## Generics
 
-Suggestions:
-1. Warning lint when use struct definitions with more than 16 fields.
+TBD: one-liner about what generics are for and how Tact differs from other langs.
 
-Unresolved questions:
-1. Should memory representation has stable rules or be a implement-details?
-2. Should we introduce Cell memory representation for messages or storage elements?
+### Compile-time execution
 
-#### Structs as tuples
-TODO
+TBD: How the program is executed in compile-time to build types.
 
-#### Sum types as tuples
-Sum types can be stored like a struct but with addition 0-index field representing a discriminant.
+Tact execution consists of two phases: _compile time_ (or _comptime_) and _runtime_.
 
-## Serialization strategies
-* automatic VS annotated VS custom serializers
+The goal of _Comptime Tact_ is to generate types, functions and impls that will be used in runtime.
 
+
+### Higher-order types
+
+TBD: What is "Type", "Interface", "Union", "Struct" etc. and their APIs
+
+### Generic types
+
+TBD: how to make types generic; how stdlib generic types are defined.
+
+### Generic functions
+
+TBD: functions and methods could be generic. 
+
+### Annotations
+
+TBD: syntax for annotations, why it's used.
+
+### Numerical bounds
+
+TBD: How numeric bounds work and why we need them: safe arithmetic, value/gas commitments.
+
+## Representation in TVM
+
+Data structures can be represented in the TVM bytecode as cells and tuples.
+
+TBD: describe when which typea are represented as cells or tuples. What compiler chooses, what 
+
+## Mutability
+
+All variables are immutable by default.
+
+TBD: syntax for mutation of variables, and across methods.
+
+
+## Serialization
+
+TBD: encoding to/from Cells
+
+TBD: partial decoding and updates
+
+TBD: how to write custom serialization code
 
 ## Namespaces and visibility
+
+TBD: describe what namespaces are and when they occur implicitly or explicitly.
+
+TBD: how imports work
+
 
 We could do Rust-style namespaces: stuff from `foo.tact` can be imported as:
 
@@ -261,163 +316,38 @@ use foo::T // refer later to T directly
 Visibility via explicit `pub` declaration.
 
 
+## Operators
 
-## Execution
+TBD: define built-in operators
 
-Tact execution consists of two phases: _comptime_ and _runtime_.
+NB: we want safe core operators, no operator overloading and no custom operators.
 
-_Comptime Tact_ is a smaller language that does not have interfaces, actors and generics. 
-It has immutable bindings, values of type "Type" and set-operations on types.
+Since operators are hard-to-search punctuation, 
+there should be little amount of those and they should be safe.
 
-The goal of _Comptime Tact_ is to generate types, functions and impls that will be used in runtime.
+Overflowing/failing operations should be done via explicitly named functions.
 
-Tact separates these phases syntactically:
+## Control flow
 
-1. File-level code is comptime: let bindings, type declarations, function declarations.
-2. Comptime function body: comptime.
-3. Runtime function body: runtime.
-4. Struct/enum body: comptime.
-5. Impl body: comptime.
-6. Interface body: comptime.
+TBD: conditionals
+
+TBD: loops
+
+TBD: errors
+
+TBD: type checks (enumerating union members)
 
 
 ## Actors
 
-### Interfaces and impls
+TBD:
 
-We do need to support impls for multiple interfaces, similar to trait impls in Rust:
+* how to declare actor interfaces
+* internal/external
+* message serialization
+* sending messages
+* strongly-typed sender
+* gas commitments
 
-```
-interface A {
-  internal foo();
-}
-interface B {
-  internal bar();
-}
-impl A for T {
-  internal foo() { ... };
-}
-impl B for T {
-  internal bar() { ... };
-}
-```
-
-For ordinary contracts with their own interface, do we have a shortcut to avoid duplicate definitions?
-
-```
-actor T {
-  internal something() { ... };
-}
-```
-
-Maybe use `actor` instead of `impl` for interface impls? 
-
-Would we have traits for plain structs and methods?
-
-See also https://www.swiftbysundell.com/articles/swift-actors/
-
-### Message send syntax
-
-Ordinary functions/methods are easy and Rust/Swift-style:
-
-```
-T::foo(a,b,c);
-a.foo(b,c);
-```
-
-We might need to distinguish message-sending syntax from ordinary function calls to:
-* quickly see if the function is pure or not;
-* avoid possible ambiguities
-
-No special syntax:
-
-```
-addr.msg(args);
-```
-
-Send keyword:
-
-```
-send addr.msg(args);
-```
-
-Fancy punctuation:
-
-```
-@addr.msg(args);
-addr->msg(args);
-addr~msg(args);
-msg(args)->addr;
-```
-
-Bureaucratic:
-
-```
-send(addr, msg, args);
-addr.send(msg, args);
-addr.send(Message{value: 0, body: ...});
-```
-
-### Typed message bodies
-
-**Option A:** arbitrary message signatures:
-
-```
-foo(arg1: T1, arg2: T2) { ... }
-```
-
-**Option B:** fixed argument `body` with user-specified type:
-
-```
-foo(body: T) { ... }
-```
-
-Option A is more typical for API design, but works poorly with system-provided context (value, sender, extra currencies).
-
-Also option B means there's declaration of `T` somewhere with its custom serialization definition (if needed).
-
-### Internal/External notation
-
-**Option A:** explicit `external`/`internal` keywords (or `ext`/`int` :-):
-
-```
-external transfer(body: Message) { ... }
-
-internal process(value: Coins, body: Message) { ... }
-```
-
-Naming is a bit off as "internal" also seems like "scope-private" to newcomers.
-
-**Option B:** uniform declaration, but distinguish internal/external by must-have params:
-
-Internal messages must have `sender` and/or `value` argument. Also: do we allow system args be skipped?
-
-```
-handler transfer(body: Message) { ... } // external
-
-handler process(sender: Address, value: Coins, body: Message) { ... } // internal
-```
-
-### Message tag
-
-Each message in an actor must be uniquely identified by a 32-bit tag. 
-By default, 32-bit message tag is calculated as CRC32 checksum of the method declaration.
-
-The message tag can be overriden (for compatibility or disambiguation) by explicit declaration:
-
-```  
-  internal(1008) my_message(...) { ... }
-```
-
-Pros: simple, elegant.
-
-Cons: might be at odds with other attributes if there are any.
-
-Alternative:
-
-```
-  @message_tag(1008)
-  internal my_message(...) { ... }
-```
 
 
