@@ -28,7 +28,7 @@ semicolon stmt = let | expr | return;
 (* List of statements with possibly trailing semicolon. *)
 stmts = (non semicolon stmt, stmt) | 
         (semicolon stmt, ";", [stmt]) |
-        (semicolon stmt | non semicolon stmt)
+        (semicolon stmt | non semicolon stmt);
 
 (* Function related stuff *)
 fn body = "(", { typed ident, "," }, ")", [ "->", expr ], "{", stmts, "}";
