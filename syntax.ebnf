@@ -6,7 +6,7 @@ ident = letter, { letter | digit | "_" };
 typed ident = ident, ":", expr;
 int = ["-"], digit, {digit};
 
-code block = "{", stmts, "}"
+code block = "{", stmts, "}";
 
 (* Expressions *)
 fn call = expr, "(", { expr, "," }, ")";
