@@ -1,0 +1,47 @@
+letter = ? A-Za-z ?;
+digit = ? 0-9 ?;
+
+(* Common stuff *)
+ident = letter, { letter | digit | "_" };
+typed ident = ident, ":", expr;
+int = ["-"], digit, {digit};
+
+code block = "{", stmts, "}"
+
+(* Expressions *)
+fn call = expr, "(", { expr, "," }, ")";
+method call = expr, ".", ident, "(", { expr, "," }, ")";
+field access = expr, ".", ident;
+struct constr = expr, "{", { ident, ":", expr, "," }, "}";
+
+expr = struct def | struct constr | ident | field access | fn call | method call | fn def | int;
+
+(* Statements *)
+let = "let", ident, "=", expr;
+if = "if", "(", expr, ")", "{", stmts "}", [else];
+else = "else", if | code_block; 
+return = "return", expr;
+
+non semicolon stmt = if | code block;
+semicolon stmt = let | expr | return;
+
+(* List of statements with possibly trailing semicolon. *)
+stmts = (non semicolon stmt, stmt) | 
+        (semicolon stmt, ";", [stmt]) |
+        (semicolon stmt | non semicolon stmt)
+
+(* Function related stuff *)
+fn body = "(", { typed ident, "," }, ")", [ "->", expr ], "{", stmts, "}";
+fn def = "fn", fn body;
+(* Note that "fn foo(x: T)(y: Z) ..." is valid syntax while "fn(x: T)(y: Z) ..." is invalid *)
+sugar fn def = "fn", ident, ["(", { typed ident, "," }, ")"], fn def;
+
+(* Structrelated stuff *)
+struct field = "val", ident, ":" expr;
+struct body = "{", { struct field }, { sugar fn def } , "}";
+struct def = "struct", struct body;
+sugar struct def = "struct", ident, ["(", { typed ident, "," }, ")"], struct body;
+
+(* Top level *)
+top_level_stmt = sugar fn def | sugar struct def | let;
+program = { top_level_stmt };
