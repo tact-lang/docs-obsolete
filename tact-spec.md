@@ -11,6 +11,8 @@
   * [Interfaces](#interfaces)
 * [Generics](#generics)
   * [Compile-time execution](#compile-time-execution)
+  * [Compile-time reflection](#compile-time-reflection)
+  * [Dependent types](#dependent-types)
   * [Higher-order types](#higher-order-types)
   * [Generic types](#generic-types)
   * [Generic functions](#generic-functions)
@@ -338,6 +340,24 @@ let nine = Int10to20.new(9); // ERR: Value out of range
 ```
 
 Due to compile-time functions, you can construct types inside of functions like above. This is powerful thing that allow to express everything you can express in other programming languages and even more!
+
+### Compile-time reflection
+
+TBD: get access to the state of the program in the compile-time and modify it.
+
+### Dependent types
+
+In tact it is need to support subset of dependent types, or rather dependent functions. It is flow from concept of compile-time functions, when return type is depend on the argument value. See following snippet:
+
+```
+fn id(T: Type) -> (fn(T) -> T) {
+  fn(x: T) { x }
+}
+```
+
+This function take value `T` of type `Type` and returns function with type `fn(T) -> T`. So, type of returned function depend on the incoming argument. It is need to express such constructions that must be provided due to fully-qualified generics support.
+
+TBD: Do we need fully-qualified dependent types with dependent pairs? How them must be looks like?
 
 ### Higher-order types
 
