@@ -392,6 +392,24 @@ let data = PairsOfInt.new(
   ); // ERR: Expected `Integer` type, got `Builder` type
 ```
 
+Generics is a common programming pattern, so we provide some sugared version of generic definitions:
+```
+// for structs
+let Foo(X: Type) = struct {
+  val field: X
+}
+struct Foo(X: Type) {
+  val field: X
+}
+// for functions
+let add(X: Type) = fn(left: X, right: X) -> X {
+  ...
+}
+fn add(X: Type)(left: X, right: X) -> X {
+  ...
+}
+```
+
 TBD: constraints for generics.
 
 ### Generic functions
