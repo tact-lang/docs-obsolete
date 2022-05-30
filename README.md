@@ -1,5 +1,8 @@
-# Tact Language Specifiction
+# Tact Documentation
 
-This is a repo for specification docs for the Tact language.
+Tact is a programming language for writing multi-actor smart contracts in TON.
 
-[📄 tact-spec.md](tact-spec.md)
+This repository contains various documentation for the [Tact](https://tact-lang.org) language.
+
+* [📄 Design Documentation](tact-design.md)
+* [📄 Tact syntax (EBNF)](syntax.ebnf)
