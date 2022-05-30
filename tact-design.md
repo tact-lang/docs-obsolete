@@ -1,4 +1,4 @@
-# Tact Language Specification
+# Tact Design
 
 * [Why Tact?](#why-tact)
 * [Syntax overview](#syntax-overview)
@@ -29,13 +29,25 @@
 
 ## Why Tact?
 
-Tact is a safe and efficient high-level programming language for writing TON smart contracts.
+Blockchains are naturally hard to scale and make tradeoffs between decentralization and expressiveness. 
+TON offers a different tradeoff: actor-based architecture allows both decentralization and infinite scalability, 
+but developers have to write complex multi-actor apps with asynchronous communication.
 
-Tact offers:
+Fift and FunC provide precise control over execution and require developer to keep in mind important aspects of cross-actor communication. 
+To unleash the full power of TON architecture we need a higher-level language designed specifically for cross-actor communication. 
+With rich type system, automatic verification of complex invariants and assurances of correct gas usage across multiple actors in the system.
 
-* High-level type system with algebraic types and numeric bounds.
-* Automatic encoding to and from TON Cells with efficient partial access.
-* First-class support for strictly-typed message handling.
+## Tact features
+
+**Actor-oriented:** Tact is designed specifically for the TON actor model. Strongly typed messages enforce communication contracts between actors.
+
+**High-level type system with algebraic types and numeric bounds** allows expressing precise invariants that can be checked statically.
+Compiler guides developer to put runtime checks where necessary to make the types match across actor and call boundaries.
+
+Tact offers **automatic serialization into cells** and **partial access to cells** to maximize efficiency while letting the developer focus on the problem at hand.
+
+**Gas control:** Tact makes cross-contract messages safe with precise gas commitments and compiler checks of the execution costs. 
+Variable costs either have static bounds, or checked explicitly in runtime.
 
 
 ## Syntax overview
@@ -56,7 +68,7 @@ TBD: short examples and key points
 
 let CONSTANT = 1;
 
-fn plus_one(a: Int8) -> Int257 {
+fn plus_one(a: Int(8)) -> Int(257) {
    return a + 1;
 }
 
