@@ -186,63 +186,82 @@ let _ = foo.method();
 
 ### Unions
 
-TBD: 
-* define unions without introducing generics first.
-* explain newtype semantics and lack of newtypes for cases
-* show match statement
-
-**WARN**: The below is outdated.
-
-Union (aka sum-type) means it is a type that can be one of multiple possible options. Union type does not create new constructors.
+Union (aka sum-type) means it is a type that can be one of multiple possible options. Difference between unions (in Tact) and tagged unions (in Rust, Haskell, Scala) is that any variant in tagged unions must be created using constructor, while in unions there are no constructors at all. Unions is a structural typing type-sum while tagged union is nominative typing type-sum.
 
 Union type definition:
 ```
-let Red = type{ /* possible fields */ };
-let Green = type{ /* possible fields */ };
-let Color = Red | Green;
-```
+let UnionType = union {
+  case Type1;
+  case Type2;
 
-Union can be generalized using function:
-```
-let Color = fn(X: Type) -> Type {
-  Red(X) | Green(X)
+  // Free method that can be called as UnionType.free_methods()
+  fn free_method() { /* implementation */ }
+  // Method that can be called only at UnionType instance
+  fn method(self: Self) { /* implementation */ }
 };
-// Usage
-let IntColor = Color(int257);
 ```
 
-or using shortcut syntax:
-```
-let Color(X: Type) = Red(X) | Green(X);
-// Usage
-let IntColor = Color(Int257);
-```
+or using sugared version:
 
-Union construction:
 ```
-fn accept_color(color: Color) {}
-fn do_something() {
-  // Construction
-  let color = Red{ /*fields*/ };
-  // Usage
-  accept_color(color);
+union UnionType {
+  /* cases and methods */
 }
 ```
 
-Union deconstruction:
+It is also possible to generalize structs using compile-time functions. To learn more, see [Generics section](#generics).
+
+When union was declared, also were declared cases - its possible variants. Case is type that is an possible option of an union. There are possible to use case when union was expected, but there are no way to use union when concrete type was expected.
+
 ```
-let data = match color {
-  Red{value} => value,
-  Green{value} => value,
-};
+struct Red{}
+struct Green{val field: Type}
+enum RG { case Red; case Green; }
+
+// Create union instance
+let x: RG = Red{};
+// Match union instance
+if (let x: Red = x) {
+  // x has type Red
+} else if (let Green {field} = x) {
+  // variable `field` has type `Type`
+}
 ```
 
-Union can be anonymous:
+#### Union subtyping
+
 ```
-let Red = type{};
-let Green = type{};
-fn returns_color() -> Red | Green { ... }
+struct Red{}
+struct Green{}
+enum RG { case Red; case Green; }
+
+// It is allowed here to pass Red, Green, RG types as argument but return value can have only `RG` type.
+fn function(arg: RG) -> RG { arg }
+
+let x: RG = Green{};
+let test1: RG = function(Red{}); // OK.
+let test2: RG = function(x); // OK.
+let test3: Red = function(Red{}); // ERR: expected `RG` type, found `Red`.
 ```
+
+#### Union extending
+```
+struct Red{}
+struct Green{}
+enum RG { case Red; case Green; }
+
+// This:
+enum RGB { case RG; case Blue; }
+// is equivalent with this:
+enum RGB { case Red; case Green; case Blue; }
+```
+
+#### Why not tagged unions?
+
+When unions was discussed, all developers suggest that tagged unions has many ergonomic problems:
+1. Hard to create and unpack.
+2. Constructors is not types.
+3. Make one tagged union from another isn't a simple operation.
 
 ### Functions
 
@@ -444,10 +463,15 @@ TBD: describe when which typea are represented as cells or tuples. What compiler
 
 ## Mutability
 
-All variables are immutable by default.
+All variables are immutable by default. To declare mutable variable user should use special keyword (TBD: `let mut` or `var`).
 
-TBD: syntax for mutation of variables, and across methods.
+Mutation occurs throught `<ident> = <expr>` syntax. TBD: `=`, `:=`, `<-` operator?
 
+TBD: global mutable variables?
+
+### Name shadowing
+
+Shadowing of local variables is allowed. Shadowing of global variable (immutable or not) produce a warning.
 
 ## Serialization
 
