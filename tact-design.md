@@ -35,8 +35,7 @@ TON offers a different tradeoff: actor-based architecture allows both decentrali
 but developers have to write complex multi-actor apps with asynchronous communication.
 
 Fift and FunC provide precise control over execution and require developer to keep in mind important aspects of cross-actor communication. 
-To unleash the full power of TON architecture we need a higher-level language designed specifically for cross-actor communication. 
-With rich type system, automatic verification of complex invariants and assurances of correct gas usage across multiple actors in the system.
+To unleash the full power of TON architecture we need a higher-level language designed specifically for cross-actor communication. With a rich type system, automatic verification of complex invariants and assurances of correct gas usage across multiple actors in the system.
 
 ## Tact features
 
@@ -48,7 +47,7 @@ Compiler guides developer to put runtime checks where necessary to make the type
 Tact offers **automatic serialization into cells** and **partial access to cells** to maximize efficiency while letting the developer focus on the problem at hand.
 
 **Gas control:** Tact makes cross-contract messages safe with precise gas commitments and compiler checks of the execution costs. 
-Variable costs either have static bounds, or checked explicitly in runtime.
+Variable costs either have static bounds or will be checked explicitly in runtime.
 
 
 ## Syntax overview
@@ -78,10 +77,10 @@ fn plus_one(a: Int(8)) -> Int(257) {
 
 ## Type system
 
-TBD: quick overview of the main features/aspects.
+TBD: a quick overview of the main features/aspects.
 
 * Strict type checking, no automatic casts.
-* Generics supported via compile-time execution, where types are values.
+* Generics are supported via compile-time execution, where types are values.
 * Algebraic types: sum types (unions) and product types (structs).
 * Numeric bounds.
 
@@ -106,26 +105,26 @@ let Null = builtin::NULL;
 
 #### Integers
 
-Default integer type is an `Integer` type which is big integer - i.e. has no constraints about possible range. This type is primarly used by the compile-time functions and by compiler built-in types. All numeric literals have type `Integer`.
+The default integer type is an `Integer` type which is a big integer - i.e. has no constraints about possible range. This type is primarily used by the compile-time functions and by compiler built-in types. All numeric literals have the type `Integer`.
 
-Type `Int` is a type based on the `Integer` type that have constraints on possible range of values. To be clear, `Int` is a function that takes a number and returns a type, for example `Int(257)` is an integer that accept numbers in range -2^256..2^256 which is corresponds to the `int257` type from FunC or TVM. It is also possible to declare integers with different ranges, for example `Int(64)` which accept integers in range -2^63..2^63, etc.
+Type `Int` is a type based on the `Integer` type but has constraints on the possible range of values. To be clear, `Int` is a function that takes a number and returns a type, for example, `Int(257)` is an integer that accepts numbers in the range -2^256..2^256 which corresponds to the `int257` type from FunC or TVM. It is also possible to declare integers with different ranges, for example, `Int(64)` which accepts integers in the range -2^63..2^63, etc.
 
-Since `Int` is a struct type it cannot be create directly from the literal (can be changed in the future). To create value of type `Int(257)`, you need to call method `new`, for example `Int(257).new(10)`.
+Since `Int` is a struct type it cannot be created directly from the literal (can be changed in the future). To create a value of type `Int(257)`, you need to call method `new`, for example, `Int(257).new(10)`.
 
-Note that types with different range of values cannot be used simultaneously - they have different types, i.e. `Integer` ≠ `Int(257)` ≠ `Int(64)`.
+Note that types with different ranges of values cannot be used simultaneously - they have different types, i.e. `Integer` ≠ `Int(257)` ≠ `Int(64)`.
 
-This separation between `Integer` and `Int` was made due to following reasons:
-1. Tact have compile-time functions that may want to operate on the different range of types than `Int257` from TVM.
+This separation between `Integer` and `Int` was made for the following reasons:
+1. Tact has compile-time functions that may want to operate on a different range of types than `Int257` from TVM.
 2. We want to add custom-ranged integer types.
 
 #### Cell
 
-`Cell` is a built-in type. It has no methods currently. `Cell` was made from `Builder` by `builder.build()`.
+`Cell` is a built-in type. It has no methods currently. `Cell` can be made from `Builder` by a `builder.build()`.
 
-`Builder` is a built-in type. It have few methods:
-1. `Builder.new()` method will create an empty builder. It is analogue to the `NEWC` instruction.
-2. `builder.store_int(value, bits)` method will add value of type `Integer` to the builder. It is analogue to the `STIQ` instruction. Note that if you want to store value with `Int` type you need to use other methods.
-3. `builder.build()` method will create a `Cell` from the builder. It is analogue to the `ENDC` instruction.
+`Builder` is a built-in type. It has a few methods:
+1. `Builder.new()` method will create an empty builder. It is analog to the `NEWC` instruction.
+2. `builder.store_int(value, bits)` method will add a value of type `Integer` to the builder. It is analog to the `STIQ` instruction. Note that if you want to store value with `Int` type you need to use other methods.
+3. `builder.build()` method will create a `Cell` from the builder. It is analog to the `ENDC` instruction.
 
 #### Tuples?
 
@@ -142,7 +141,7 @@ TBD: what do we ship as a standard library: ranges, subranges of integers, Optio
 
 TBD: define structs without introducing generics first. Generics will be dealt in a separate section.
 
-Structs (aka "product types") allow  multiple fields of different types that exists as one entity. Product types have fields and methods — functions that operate on these fields.
+Structs (aka "product types") allow multiple fields of different types that exists as one entity. Product types have fields and methods — functions that operate with these fields.
 
 Example of the declaration of the struct:
 ```
@@ -158,14 +157,14 @@ let Foo = struct {
 };
 ```
 
-or using sugared version:
+or using a sugared version:
 ```
 struct Foo {
   /* fields and methods */
 }
 ```
 
-It is also possible to generalize structs using compile-time functions. To learn more, see [Generics section](#generics).
+It is also possible to generalize structs using compile-time functions. To learn more, see the [Generics section](#generics).
 
 Usage of the struct types:
 ```
@@ -187,7 +186,7 @@ let _ = foo.method();
 
 ### Unions
 
-Union (aka sum-type) means it is a type that can be one of multiple possible options. Difference between unions (in Tact) and tagged unions (in Rust, Haskell, Scala) is that any variant in tagged unions must be created using constructor, while in unions there are no constructors at all. Unions is a structural typing type-sum while tagged union is nominative typing type-sum.
+Union (aka sum-type) means it is a type that can be one of the multiple possible options. The difference between unions (in Tact) and tagged unions (in Rust, Haskell, Scala) is that any variant in tagged unions must be created using a constructor, while in unions there are no constructors at all. Union is a structural typing type-sum while tagged union is a nominative typing type-sum.
 
 Union type definition:
 ```
@@ -202,7 +201,7 @@ let UnionType = union {
 };
 ```
 
-or using sugared version:
+or using a sugared version:
 
 ```
 union UnionType {
@@ -210,9 +209,9 @@ union UnionType {
 }
 ```
 
-It is also possible to generalize structs using compile-time functions. To learn more, see [Generics section](#generics).
+It is also possible to generalize structs using compile-time functions. To learn more, see the [Generics section](#generics).
 
-When union was declared, also were declared cases - its possible variants. Case is type that is an possible option of an union. There are possible to use case when union was expected, but there are no way to use union when concrete type was expected.
+When a union was declared, also were declared cases - its possible variants. Case is a type that is a possible option of a union. There are possible to use a case when the union was expected, but there is no way to use union when concrete type was expected.
 
 ```
 struct Red{}
@@ -259,31 +258,31 @@ enum RGB { case Red; case Green; case Blue; }
 
 #### Why not tagged unions?
 
-When unions was discussed, all developers suggest that tagged unions has many ergonomic problems:
+When unions were discussed, all developers suggest that tagged unions have many ergonomic problems:
 1. Hard to create and unpack.
-2. Constructors is not types.
-3. Make one tagged union from another isn't a simple operation.
+2. Constructors are not types.
+3. Making one tagged union from another isn't a simple operation.
 
 ### Functions
 
-Functions in Tact is like functions in other programming languages. They have list of typed arguments and body. When function is called it returns some value or do something.
+Functions in Tact are like functions in other programming languages. They have a list of typed arguments and a body. When a function is called it returns some value or does something.
 
-Declaration of the function is as follows:
+The declaration of the function is as follows:
 ```
 let func = fn(arg1: Type1, arg2: Type2, ...) -> Type {
   /* body of stmts */
 }
 ```
-or using sugared version:
+or using a sugared version:
 ```
 fn func(arg1: Type1, arg2: Type2, ...) -> Type {
   /* body of stmts */
 }
 ```
 
-It is also possible to generalize functions using compile-time functions. To learn more, see [Generics section](#generics).
+It is also possible to generalize functions using compile-time functions. To learn more, see the [Generics section](#generics).
 
-It is possible to create anonymous functions, i.e. function without names and use them in place as in follows:
+It is possible to create anonymous functions, i.e. function without names and use them in place as follows:
 ```
 let two = (fn(x: Int) { x + 1 })(1);
 ```
@@ -299,33 +298,33 @@ TBD: why we need interfaces and their semantics.
 
 ## Generics
 
-Generic programming is a significant part of modern programming languages. It is important concept without which it is impossible to imagine programming. 
+Generic programming is a significant part of modern programming languages. It is an important concept without which it is impossible to imagine programming. 
 
-Many other languages, such as C#, Java, Kotlin, Rust creates their own metalanguages with special syntax and semantic and builds generic programming based on these metalanguages. It is common concept that allow to simply integrate generic programming in the common programming process, but this way has limitations (FIXME: better word) benefits:
+Many other languages, such as C#, Java, Kotlin and Rust create their own metalanguages with special syntax and semantic and build generic programming based on these metalanguages. It is a common concept that allows simply integrate generic programming into the common programming process, but this way has limitations (FIXME: better word) benefits:
 
 1. Metalanguage is yet another language with its own rules and syntax which complicates already complicated language.
 2. Supporting two languages takes more time than supporting one language.
-3. Metalanguage forces to duplicate concepts within a language which generates an incostistency.
+3. Metalanguage forces to duplicate concepts within a language which generates an inconsistency.
 4. It is hard to implement such conceptions in metalanguage that we want to see in Tact, such as custom ranges, etc.
 
-Due to above we decide do not introduce special metalanguage to Tact. Our system based on one language with compile-time functions operating on the types which is just values like other values. Our system has much in common with Zig concepts.
+Due to the above, we decided to not introduce a special metalanguage to Tact. Our system is based on one language with compile-time functions operating on the types which are just values like other values. Our system has much in common with Zig concepts.
 
-TODO: add section about justification that generics split languages at two different.
+TODO: add a section about justification that generics split languages into two different.
 
 ### Compile-time evaluation
 
-As we described above, we do not to split language at two different, so we provide compile-time evaluation of functions that written in the Tact language. General goal of the compile-time functions is provide a way to generate types, functions and change them. It provides powerful possibilities to create different type constructions like templates in C++ or comptime in Zig.
+As we described above, we do not split language into two different, so we provide a compile-time evaluation of functions that are written in the Tact language. The general goal of the compile-time functions is to provide a way to generate types and functions and change them. It provides powerful possibilities to create different type constructions like templates in C++ or comptime in Zig.
 
-There are some limitations which functions can be evaluated in the compile-time:
+There are some limitations in which functions can be evaluated in the compile-time:
 1. Compile-time functions cannot call asm bytecode.
-2. Compile-time functions cannot access to the runtime-only variables and constants, such as contract balance, chain gas fee, etc.
+2. Compile-time functions cannot access the runtime-only variables and constants, such as contract balance, chain gas fee, etc.
 3. Compile-time functions cannot call other runtime-only functions.
 
-Any function that satisifes above rules can be evaluated in compile-time.
+Any function that satisfies the above rules can be evaluated in compile-time.
 
-Main rule of the compile-time: **everything can be evaluated must be evaluated**. This rule is called "global evaluation rule" (TBD?) This means that compiler will try to evaluate everything can be evaluated using common with runtime rules of execution functions (except runtime-only variables and functions).
-
-Let's understand this principle. Suppose you have following code:
+The main rule of the compile-time: **everything that can be evaluated must be evaluated**. This rule is called the "global evaluation rule" (TBD?) This means that the compiler will try to evaluate everything that can be evaluated using common runtime rules of execution functions (except runtime-only variables and functions).
+ 
+Let's understand this principle. Suppose you have the following code:
 ```
 // Definitions
 let CONST = 10;
@@ -342,14 +341,14 @@ fn do_stuff() {
 ```
 
 Let's consider these statements:
-1. `CONST` and `const_fn` is constants which returns constant values. They will be evaluating everywhere.
-2. `add` is a function that accept arguments and do not access runtime variables, so it _can be_ evaluated.
-3. `get_balance` is a function that access runtime variable (balance), so it cannot be evaluated in runtime.
+1. `CONST` and `const_fn` are constants that return constant values. They will be evaluating everywhere.
+2. `add` is a function that accepts arguments and does not access runtime variables, so it _can be_ evaluated.
+3. `get_balance` is a function that accesses runtime variable (balance), so it cannot be evaluated in runtime.
 4. `let a = add(CONST, const_fn());` is evaluable expression due to it call constant function `const_fn` and function that can be evaluated (`add`). So it will be evaluated in compile-time and this expression will be rewritten to the `let a = 20` expr whih is a constant.
 5. `let b = get_balance();` is a runtime expression because of `get_balance` is a runtime function, so this expression won't be evaluated.
-6. `let c = add(b, 10)` is a runtime expression due to it access runtime variable `b`, so this expression won't be evaluated.
+6. `let c = add(b, 10)` is a runtime expression because this expression access runtime variable `b`, so this expression won't be evaluated.
 
-This evaluating concepts have significant benefit in our system: compile-time-only functions will be evaluated in compile-time and will not get to runtime. This allow to build type system based on the compile-time functions. To illustrate usage of this let's consider following code fragment (syntax can be changed in future):
+This evaluating concept has a significant benefit in our system: compile-time-only functions will be evaluated in compile-time and will not get to runtime. This allows build type system based on the compile-time functions. To illustrate the usage of this let's consider the following code fragment (syntax can be changed in the future):
 
 ```
 fn IntRanged(from: Integer, to: Integer) -> Type {
@@ -371,7 +370,7 @@ let ten = Int10to20.new(10); // OK
 let nine = Int10to20.new(9); // ERR: Value out of range
 ```
 
-Due to compile-time functions, you can construct types inside of functions like above. This is powerful thing that allow to express everything you can express in other programming languages and even more!
+Due to compile-time functions, you can construct types inside of functions like the above. This is a powerful thing that allows express everything you can express in other programming languages and even more!
 
 ### Compile-time reflection
 
@@ -379,7 +378,7 @@ TBD: get access to the state of the program in the compile-time and modify it.
 
 ### Dependent types
 
-In tact it is need to support subset of dependent types, or rather dependent functions. It is flow from concept of compile-time functions, when return type is depend on the argument value. See following snippet:
+In Tact, it is needed to support a subset of dependent types or rather dependent functions. It flows from the concept of compile-time functions when the return type is dependent on the argument value. See the following snippet:
 
 ```
 fn id(T: Type) -> (fn(T) -> T) {
@@ -387,9 +386,9 @@ fn id(T: Type) -> (fn(T) -> T) {
 }
 ```
 
-This function take value `T` of type `Type` and returns function with type `fn(T) -> T`. So, type of returned function depend on the incoming argument. It is need to express such constructions that must be provided due to fully-qualified generics support.
+This function takes value `T` of type `Type` and returns function with type `fn(T) -> T`. So, the type of returned function is dependent on the incoming argument. It is needed to express such constructions that must be provided due to fully-qualified generics support.
 
-TBD: Do we need fully-qualified dependent types with dependent pairs? How them must be looks like?
+TBD: Do we need fully-qualified dependent types with dependent pairs? How them must look like?
 
 ### Higher-order types
 
@@ -397,9 +396,9 @@ TBD: What is "Type", "Interface", "Union", "Struct" etc. and their APIs
 
 ### Generic types
 
-Generics is a construct that allow operate on values without knowing of concrete type of the value. Generics usually allow to describe interface of a type of a value, and use this interface inside of generic function or generic type. Generics in Tact is implemented using compile-time functions. Due to global evaluation rule generic functions will be instansiated in place of usage.
+Generics is a construct that allows operating on values without knowing of concrete type of the value. Generics usually allow to describe an interface of a type of a value and use this interface inside of a generic function or generic type. Generics in Tact is implemented using compile-time functions. Due to the global evaluation rule, generic functions will be instantiated in place of usage.
 
-Let's see example of generic struct definition:
+Let's see an example of the generic struct definition:
 ```
 fn Pair(T: Type) -> Type {
   struct {
@@ -424,7 +423,7 @@ let data = PairsOfInt.new(
   ); // ERR: Expected `Integer` type, got `Builder` type
 ```
 
-Generics is a common programming pattern, so we provide some sugared version of generic definitions:
+Generics is a common programming pattern, so we provide some sugared versions of generic definitions:
 ```
 // for structs
 let Foo(X: Type) = struct {
@@ -465,14 +464,14 @@ This section is about implement details of converting tact program to TVM byteco
 Data structures can be represented in the TVM bytecode as cells ro tuples
 
 #### Representation using Cells
-Cells allow to store arbitrary sequence of bytes up to 1023 bits. 
+Cells allow storing an arbitrary sequence of bytes up to 1023 bits. 
 
 Pros of using Cells:
 1. No need of deserializing when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
 2. Compact storage of integers that do not cover the entire `int257` range.
 
 Cons of using Cells:
-1. Necessity to create hierarchical cell structures because data the structure can be larger than 1023 bytes.
+1. The necessity to create hierarchical cell structures because data the structure can be larger than 1023 bytes.
 2. Expensive read operations (compared to tuples).
 3. No write operations.
 
@@ -483,50 +482,50 @@ Pros of using Tuples:
 1. Simple read/write of arbitrary elements.
 
 Cons of using Tuples:
-1. Necessity to deserialize into Cells when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
+1. The necessity to deserialize into Cells when sending structure using `SENDRAWMSG` or when storing in the storage `c4`.
 2. Expensive operations with tuples having more than 16 elements.
 
 #### Solution: Always use tuples
 Cells are designed for sending messages between actors and storing values in persistent storage `c4`. Instead, tuples are designed to represent algebraic data types (see 1.1.3 section of [TVM paper](https://ton-blockchain.github.io/docs/tvm.pdf)).
 
-Tuples have more simpler API which allows to get values from the tuple using 1 bytecode operation `INDEX` while extraction from cell require:
-1. Create slice if not created.
+Tuples have a simpler API which allows getting values from the tuple using 1 bytecode operation `INDEX` while extraction from cell requires:
+1. Create a slice if not created.
 2. Push bits to be skipped at the stack.
 3. Skip bits using `SDSKIPFIRST`.
 4. Read field.
 
-Tuple elements can be mutated using `SETINDEX` opcode while slice of cell can be mutated by:
-1. Create new builder.
-2. Store all previous data before field need to be mutated.
+Tuple elements can be mutated using `SETINDEX` opcode while a slice can be mutated by:
+1. Create a new builder.
+2. Store all previous data before the field needs to be mutated.
 3. Store mutated field.
 4. Store all other fields.
 
 Based on the above it is better to use tuples to represent data structures in the TVM.
 
 Suggestions:
-1. Warning lint when use struct definitions with more than 16 fields.
+1. Warning lint when using struct definitions with more than 16 fields.
 
 Unresolved questions:
-1. Should memory representation has stable rules or be a implement-details?
+1. Should memory representation has stable rules or be implement-details?
 2. Should we introduce Cell memory representation for messages or storage elements?
 
 ##### Struct as tuple
-Struct has fields and methods. Field is member represent variable data, while method is a function that operates on this data.
+Struct has fields and methods. Field is a member representing variable data, while a method is a function that operates on this data.
 
-It is possible to implement such "virtual table" like in typical OOP-languages such as C#, Java, but there are no need to do this in Tact. Tact isn't OOP language, so all methods can be converted to free functions, so there are no need to store methods next to struct instance.
+It is possible to implement such a "virtual table" like in typical OOP languages such as C# and Java, but there is no need to do this in Tact. Tact isn't OOP language, so all methods can be converted to free functions, so there is no need to store methods next to the struct instance.
 
-In TVM values are stored on a stack separately. So, there are no problems with memory alignments and there is no difference between the order of fields in stack. Fields of struct stored in the same order as they declared.
+In TVM values are stored on a stack separately. So, there are no problems with memory alignments and there is no difference between the order of fields in a stack. Fields of a struct are stored in the same order as they are declared.
 
-Compiler can optimize memory representation. It can inline tuples as tensors if tuple is not used, or if this tuple used in other tuple. Compiler will always inline tuples consists of 0 or 1 element.
+The compiler can optimize memory representation. It can inline tuples as tensors if a tuple is not used, or if this tuple is used in another tuple. The compiler will always inline tuples consisting of 0 or 1 element.
 
 ##### Union as tuple
-Sum types can be stored like a struct but with addition 0-index field representing a discriminator.
+Sum-types can be stored like a struct but with an additional 0-index field representing a discriminator.
 
 TBD: Concrete memory model (see [discussion](https://github.com/tact-lang/docs/discussions/18)).
 
 ## Mutability
 
-All variables are immutable by default. To declare mutable variable user should use special keyword (TBD: `let mut` or `var`).
+All variables are immutable by default. To declare a mutable variable user should use a special keyword (TBD: `let mut` or `var`).
 
 Mutation occurs throught `<ident> = <expr>` syntax. TBD: `=`, `:=`, `<-` operator?
 
