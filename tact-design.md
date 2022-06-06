@@ -9,6 +9,7 @@
   * [Unions](#unions)
   * [Functions](#functions)
   * [Interfaces](#interfaces)
+  * [Type Hierarchy](#type-hierarchy)
 * [Generics](#generics)
   * [Compile-time execution](#compile-time-execution)
   * [Compile-time reflection](#compile-time-reflection)
@@ -294,6 +295,27 @@ TBD: why we need interfaces and their semantics.
 
 
 
+
+### Type Hierarchy
+
+With rigid separation of programs by types and terms there are no need to introduce type hierarchies. But in Tact types are terms, so it is need to introduce type hierarchy which allow to differentiate between types and types of types (e.g. type `Type`).
+
+Currently, type hierarchy in Tact is as follows:
+1. Values and expressions on values has types `Int`, `Bool`, etc.
+2. Values `Int`, `Bool`, etc. has type `Type 0`.
+3. Value `Type N` has type `Type N+1`.
+
+This is what about direct types. But there are also type-sets in Tact. Type-set is a type that can take values of strictly bounded count of types down by hierarchy. For example, type-set with type `Type 1` can take values with types `Type 0`, `Type 2` can take values with types `Type 1`, etc.
+
+This is used in interfaces. Interface in Tact is an entity with type `Type 1`, so it can take values of types `Type 0`.
+
+This hierarchy allow to bring interfaces in type system without adding special syntax and/or semantic. With this type hierarchy it is possible to make generic bounded functions which accept some value with type `Type 0` because interfaces has strictly bounded set of values they can accept which is interface functionality. When user wants to accept a disjunction or conjuction set of interfaces it can use operators decribed below.
+
+It is possible situation that type must accept types that implements 2 or more interfaces. In this situation type must be declared using ∩ operator, e.g. type `Interface1 ∩ Interface2` can accept only values that implements both `Interface1` AND `Interface1`.
+
+It is possible situation that type must accept types that can implements only one of the 2 or more interfaces. In this situation type must be declared using ∪ operator, e.g. type `Interface1 ∪ Interface2` can accept only values that implements `Interface1` OR `Interface1`.
+
+There are also type-sets of interfaces that have type `Type 2` and so can accept values of type `Type 1` which is interfaces. For example, `Type 2` type can accept any interface as an value. It is allow to manipulate on interfaces in compile-time, construct interfaces in compile-time, change them and etc. TODO: strict sets of possible iterfaces?
 
 
 ## Generics
