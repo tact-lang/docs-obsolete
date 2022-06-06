@@ -7,6 +7,8 @@ typed ident = ident, ":", expr;
 int = ["-"], digit, {digit};
 
 code block = "{", stmts, "}";
+(* Note that generics in Tact is not same as generics in other languages. *)
+generics = "(", { typed ident, "," }, ")";
 
 (* Expressions *)
 fn call = expr, "(", { expr, "," }, ")";
@@ -30,18 +32,32 @@ stmts = (non semicolon stmt, stmt) |
         (semicolon stmt, ";", [stmt]) |
         (semicolon stmt | non semicolon stmt);
 
-(* Function related stuff *)
-fn body = "(", { typed ident, "," }, ")", [ "->", expr ], "{", stmts, "}";
+(* Functions *)
+fn sig = "(", { typed ident, "," }, ")", [ "->", expr ];
+fn body = fn sig, "{", stmts, "}";
 fn def = "fn", fn body;
 (* Note that "fn foo(x: T)(y: Z) ..." is valid syntax while "fn(x: T)(y: Z) ..." is invalid *)
-sugar fn def = "fn", ident, ["(", { typed ident, "," }, ")"], fn def;
+sugar fn def = "fn", ident, [generics], fn def;
+named fn sig = "fn", ident, [generics], fn sig;
 
-(* Structrelated stuff *)
-struct field = "val", ident, ":" expr;
-struct body = "{", { struct field }, { sugar fn def } , "}";
+(* Structs *)
+struct field = "val", ident, ":" expr, [";"];
+struct body = "{", { struct field }, { sugar fn def | impl intf } , "}";
 struct def = "struct", struct body;
-sugar struct def = "struct", ident, ["(", { typed ident, "," }, ")"], struct body;
+sugar struct def = "struct", ident, [generics], struct body;
+
+(* Unions *)
+union case = "case", expr, [";"];
+union body = "{", { union case }, { sugar fn def } , "}";
+union def = "union", union body;
+sugar union def = "union", ident, [generics], union body;
+
+(* Interfaces *)
+intf body = "{", { named intf sig } , "}";
+intf def = "interface", intf body;
+sugar intf def = "interface", ident, [generics], union body;
+impl intf = "impl", expr, "{", { sugar fn def }, "}";
 
 (* Top level *)
-top_level_stmt = sugar fn def | sugar struct def | let;
+top_level_stmt = sugar fn def | sugar struct def | sugar union def | sugar intf def | let;
 program = { top_level_stmt };
