@@ -298,24 +298,24 @@ TBD: why we need interfaces and their semantics.
 
 ### Type Hierarchy
 
-With rigid separation of programs by types and terms there are no need to introduce type hierarchies. But in Tact types are terms, so it is need to introduce type hierarchy which allow to differentiate between types and types of types (e.g. type `Type`).
+With the rigid separation of programs by types and terms, there is no need to introduce type hierarchies. But in Tact types are terms, so it needs to introduce a type hierarchy that allows differentiation between types and types of types (e.g. type `Type`).
 
-Currently, type hierarchy in Tact is as follows:
-1. Values and expressions on values has types `Int`, `Bool`, etc.
-2. Values `Int`, `Bool`, etc. has type `Type 0`.
+Currently, the type hierarchy in Tact is as follows:
+1. Values and expressions on values have types `Int`, `Bool`, etc.
+2. Values `Int`, `Bool`, etc. have type `Type 0`.
 3. Value `Type N` has type `Type N+1`.
 
-This is what about direct types. But there are also type-sets in Tact. Type-set is a type that can take values of strictly bounded count of types down by hierarchy. For example, type-set with type `Type 1` can take values with types `Type 0`, `Type 2` can take values with types `Type 1`, etc.
+This is what about direct types. But there are also type-sets in Tact. Type-set is a type that can take values of a strictly bounded count of types down by hierarchy. For example, type-set with type `Type 1` can take values with types `Type 0`, `Type 2` can take values with types `Type 1`, etc.
 
-This is used in interfaces. Interface in Tact is an entity with type `Type 1`, so it can take values of types `Type 0`.
+This is used in interfaces. Interface in Tact is an entity with type `Type 1`, so it can take values of type `Type 0`.
 
-This hierarchy allow to bring interfaces in type system without adding special syntax and/or semantic. With this type hierarchy it is possible to make generic bounded functions which accept some value with type `Type 0` because interfaces has strictly bounded set of values they can accept which is interface functionality. When user wants to accept a disjunction or conjuction set of interfaces it can use operators decribed below.
+This hierarchy allows to bring interfaces in the type system without adding special syntax and/or semantics. With this type hierarchy, it is possible to make generic bounded functions that accept some value with type `Type 0` because interfaces have a strictly bounded set of values they can accept which is interface functionality. When a user wants to accept a disjunction or conjunction set of interfaces it can use the operators described below.
 
-It is possible situation that type must accept types that implements 2 or more interfaces. In this situation type must be declared using ∩ operator, e.g. type `Interface1 ∩ Interface2` can accept only values that implements both `Interface1` AND `Interface1`.
+It is a possible situation when a type must accept types that implement 2 or more interfaces. In this situation type must be declared using an ∩ operator, e.g. type `Interface1 ∩ Interface2` can accept only values that implement both `Interface1` AND `Interface1`.
 
-It is possible situation that type must accept types that can implements only one of the 2 or more interfaces. In this situation type must be declared using ∪ operator, e.g. type `Interface1 ∪ Interface2` can accept only values that implements `Interface1` OR `Interface1`.
+It is a possible situation that type must accept types that can implement only one of the 2 or more interfaces. In this situation type must be declared using ∪ operator, e.g. type `Interface1 ∪ Interface2` can accept only values that implement `Interface1` OR `Interface1`.
 
-There are also type-sets of interfaces that have type `Type 2` and so can accept values of type `Type 1` which is interfaces. For example, `Type 2` type can accept any interface as an value. It is allow to manipulate on interfaces in compile-time, construct interfaces in compile-time, change them and etc. TODO: strict sets of possible iterfaces?
+There are also type-sets of interfaces that have type `Type 2` and so can accept values of type `Type 1` which is interfaces. For example, the `Type 2` type can accept any interface as a value. It allows for manipulating interfaces in compile-time, constructing interfaces in compile-time, changing them, etc. TODO: strict sets of possible interfaces?
 
 
 ## Generics
