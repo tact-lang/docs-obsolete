@@ -289,12 +289,66 @@ let two = (fn(x: Int) { x + 1 })(1);
 
 ### Interfaces
 
-TBD: why we need interfaces and their semantics.
+Interface in Tact is an object that describes which functions other types that implement this interface should contain. When a type decides to implement an interface it must provide an implementation of all functions from the interface definition with concrete signatures. 
 
+Interfaces are a default way to polymorphic computation. For example, 
 
+To define an interface, use the following syntax:
+```
+interface InterfaceName {
+  fn function_name(arg: Ty) -> ReturnTy
+  fn second_function(...) -> ...
+  ...
+}
+```
 
+When struct or union should implement an interface, the following construction should be used:
+```
+struct Foo {
+  /* fields and function */
+  impl InterfaceName {
+    /* interface functions implementation */
+  }
+}
+```
 
+Then, functions defined in the `impl` body can be used as functions declared in the struct body, like in the following example:
+```
+interface Test {
+  fn static_fn()
+  fn method_fn(self: Self)
+}
+struct Empty {
+  impl Test {
+    fn static_fn() {}
+    fn method_fn(self: Self) {}
+  }
+}
+let _ = Empty.static_fn();
+let _ = Empty{}.method_fn();
+```
 
+#### Use interface to constraint a type
+
+Primarily goal of the interfaces is to add a possibility to constrain types. When type is constrained - it means that the input type should implement an interface, otherwise type-checker will throw a compile error. 
+
+```
+fn serialize_pair(A: Serialize, B: Serialize)(arg1: A, arg2: B) -> Builder {
+  let b = Builder.new();
+  let b = arg1.serialize(b);
+  let b = arg2.serialize(b);
+  return b;
+}
+```
+
+In the above example function with 2 generic types were declared. These generic types are constrained over `Serialize` interface, so if this function will be called with types that do not implement `Serialize` interface, compile error will be thrown.
+
+```
+let _ = serialize_pair(Int(64), Int(128))(...); // OK: Int type implements `Serialize`
+let _ = serialize_pair(Builder, Slice)(...); // ERR: Builder and Slice does not implement `Serialize`
+```
+
+More about how constraints work you can find in the [Type Hierarchy section](#type-hierarchy).
 
 ## Generics
 
