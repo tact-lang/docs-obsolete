@@ -221,10 +221,9 @@ enum RG { case Red; case Green; }
 // Create union instance
 let x: RG = Red{};
 // Match union instance
-if (let x: Red = x) {
-  // x has type Red
-} else if (let Green {field} = x) {
-  // variable `field` has type `Type`
+switch (x) {
+  case Red x => { /* x has type Red */ }
+  case Green {field} => { /* field has type Red */ }
 }
 ```
 
