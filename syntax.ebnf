@@ -23,8 +23,10 @@ let = "let", ident, "=", expr;
 if = "if", "(", expr, ")", "{", stmts "}", [else];
 else = "else", if | code_block; 
 return = "return", expr;
+switch = "switch", "(", expr, ")", "{", { switch branch }, "}";
+switch branch = "case", expr, ident, "=>", code_block;
 
-non semicolon stmt = if | code block;
+non semicolon stmt = if | code block | switch;
 semicolon stmt = let | expr | return;
 
 (* List of statements with possibly trailing semicolon. *)
