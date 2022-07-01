@@ -9,6 +9,7 @@
   * [Unions](#unions)
   * [Functions](#functions)
   * [Interfaces](#interfaces)
+* [Type Hiearchy](#type-hierarchy)
 * [Generics](#generics)
   * [Compile-time execution](#compile-time-execution)
   * [Compile-time reflection](#compile-time-reflection)
@@ -348,6 +349,69 @@ let _ = serialize_pair(Builder, Slice)(...); // ERR: Builder and Slice does not 
 ```
 
 More about how constraints work you can find in the [Type Hierarchy section](#type-hierarchy).
+
+## Type hierarchy
+
+With the rigid separation of programs by types and terms, there is no need to introduce type hierarchies. But in Tact types are terms, so it needs to introduce a type hierarchy that allows differentiation between types and types of types (e.g. type `Type`).
+
+Currently, the type hierarchy in Tact is as follows:
+1. Runtime values have types `Int`, `Builder`, etc.
+2. Values `Int`, `Bool`, etc. have type `Type 0`.
+3. Value `Type N` has type `Type N+1`.
+
+Hierarchy of integer type:
+
+<table>
+  <tr>
+    <td>Value</td>
+    <td>Type</td>
+  </tr>
+  <tr>
+    <td>1, 2, 3...</td>
+    <td>Integer</td>
+  </tr>
+  <tr>
+    <td>Integer</td>
+    <td>Type 0</td>
+  </tr>
+  <tr>
+    <td>Type N</td>
+    <td>Type N+1</td>
+  </tr>
+</table>
+
+So, runtime values can have one of the following types:
+1. Built-in type: Integer, Bool, builtin_Builder, etc.
+2. User-defined type: struct type or union type.
+
+These built-in and user-defined types, in turn, have type `Type 0` which means "type of types of runtime value". `Type 0` has type `Type 1` which means "type of type of types of runtime value". This is true for all next `Type N` types.
+
+This system is required to solve the following problems:
+1. Distinguishing between types and type of types. Let's imagine that type `Type` also has type `Type`. In this case following example will be valid which is appropriate:
+```
+fn test(X: Type) { struct { val x: X } }
+let _ = test(Type); // What this should means?
+```
+2. Constrain types of runtime values with interfaces.
+
+### Interfaces as values
+As mentioned above, Type Hierarchy allows the introduction of interface constraints and usage of interfaces without new additional syntax. 
+
+Interfaces in Tact have type `Type 1`. Remember that builtins and user-defined types have type `Type 0`, so, types can be passed as a value when it is expected to take a value of `Type 0` type or interface type because both interfaces and `Type 0` have type `Type 1`.
+
+In practice, it allows expressing generic functions with constraints. Let's see at the following examples:
+```
+fn polymorphic(T: Type)(t: T) {}
+
+interface Intf {}
+fn polymorphic_constrained(T: Intf)(t: T) {}
+```
+
+Function `polymorphic` is expected as the first argument for any built-in or user-defined type because built-ins and user-defined types have type `Type 0`.
+
+Function `polymorphic_constrained` is expected as the first argument for built-in or user-defined type that implements interface `Intf`. 
+
+TBD: functionality to handle interfaces.
 
 ## Generics
 
