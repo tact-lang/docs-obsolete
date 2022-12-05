@@ -1,4 +1,4 @@
-# Tact spec
+# Tact Contracts
 
 Here's a quick recap of some features aimed at multi-actor contracts.
 
